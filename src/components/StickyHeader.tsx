@@ -27,7 +27,7 @@ export default function StickyHeader() {
         >
             <div className="flex items-center gap-3">
                 <BrainCircuit className="w-6 h-6 text-cyan-400 drop-shadow-[0_0_8px_cyan]" />
-                <span className="text-white font-black tracking-widest text-lg">CognitoShield</span>
+                <span className="text-white font-black tracking-widest text-lg">CogniGuard</span>
             </div>
 
             <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full">

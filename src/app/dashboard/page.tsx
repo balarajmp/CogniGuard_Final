@@ -55,7 +55,7 @@ function CommandCenter() {
                 {/* Logo */}
                 <div className="flex items-center gap-3">
                     <BrainCircuit className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_cyan]" />
-                    <span className="text-white font-black tracking-widest text-sm">CognitoShield</span>
+                    <span className="text-white font-black tracking-widest text-sm">CogniGuard</span>
                     <span className="text-[10px] font-mono text-cyan-500/60 tracking-widest uppercase hidden sm:inline">/ Command Center</span>
                 </div>
 

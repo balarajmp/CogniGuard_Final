@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     )
 
     # --- App ---
-    PROJECT_NAME: str = "CognitoShield Sentinel Ecosystem"
+    PROJECT_NAME: str = "CogniGuard Sentinel Ecosystem"
     API_V1_STR: str = "/api"
     API_VERSION: str = "1.0.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"

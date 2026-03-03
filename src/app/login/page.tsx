@@ -132,7 +132,7 @@ export default function LoginPage() {
             </div>
 
             <div className="absolute bottom-8 text-center w-full pointer-events-none">
-                <p className="text-[10px] font-mono tracking-widest uppercase text-gray-600">CognitoShield Kernel &bull; Authorization Required</p>
+                <p className="text-[10px] font-mono tracking-widest uppercase text-gray-600">CogniGuard Kernel &bull; Authorization Required</p>
             </div>
         </div>
     );

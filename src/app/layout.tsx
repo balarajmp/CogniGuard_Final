@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CognitoShield",
+  title: "CogniGuard — Privacy-First Cognitive Load & Burnout Detection",
   description: "A Privacy-First Platform for Cognitive Load & Burnout Detection",
 };
 

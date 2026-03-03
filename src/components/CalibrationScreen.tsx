@@ -85,7 +85,7 @@ export default function CalibrationScreen({ onComplete }: { onComplete: () => vo
                     {/* Logo lockup */}
                     <div className="flex items-center gap-2 mb-8">
                         <BrainCircuit className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_cyan]" />
-                        <span className="text-white font-black tracking-widest text-sm uppercase">CognitoShield</span>
+                        <span className="text-white font-black tracking-widest text-sm uppercase">CogniGuard</span>
                     </div>
 
                     {/* Step indicator */}

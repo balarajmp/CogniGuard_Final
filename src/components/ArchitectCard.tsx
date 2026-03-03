@@ -22,7 +22,7 @@ export default function ArchitectCard() {
 
                     <div className="w-full h-full rounded-full overflow-hidden bg-gray-900 absolute inset-0">
                         <img
-                            src="/profile.png.jpg"
+                            src="/balaraj.jpg"
                             alt="Balaraj M P - Lead Architect"
                             className="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-700 ease-out scale-100 group-hover:scale-110"
                         />
@@ -31,7 +31,7 @@ export default function ArchitectCard() {
 
                 {/* Certificate Info */}
                 <h3 className="text-white font-bold text-2xl tracking-wide group-hover:text-cyan-300 transition-colors duration-300">Balaraj M P</h3>
-                <p className="text-cyan-400 text-xs font-mono mt-2 mb-6 tracking-widest uppercase">Systems Architect | CognitoShield</p>
+                <p className="text-cyan-400 text-xs font-mono mt-2 mb-6 tracking-widest uppercase">Systems Architect | CogniGuard</p>
 
                 {/* Links */}
                 <div className="flex gap-4">

@@ -53,7 +53,7 @@ export default function Home() {
           className="h-screen flex flex-col items-center justify-center pointer-events-auto px-4 relative z-20"
         >
           <h1 className="text-6xl sm:text-7xl md:text-9xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white via-cyan-100 to-cyan-800 mb-6 drop-shadow-[0_0_40px_rgba(34,211,238,0.15)] text-center leading-none">
-            CognitoShield
+            CogniGuard
           </h1>
           <p className="mt-4 text-xl sm:text-2xl md:text-3xl text-cyan-400 font-mono tracking-[0.1em] text-center uppercase font-light drop-shadow-[0_0_10px_rgba(34,211,238,0.5)] max-w-4xl mx-auto">
             A Privacy-First Platform for Cognitive Load &amp; Burnout Detection
