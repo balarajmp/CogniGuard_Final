@@ -1,0 +1,28 @@
+{
+    // ── Python (Backend) ─────────────────────────────────────────────────────
+    // Points VS Code to the venv we created in backend/venv
+    "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    // Pylance / Pyre — tell it where to find installed packages
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend/venv/Lib/site-packages"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    // Suppress the Pyre2 "could not find import" false positives
+    // (Pyre2 is configured separately and doesn't read venv; Pylance handles this)
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    // ── TypeScript / Next.js (Frontend) ──────────────────────────────────────
+    "typescript.tsdk": "${workspaceFolder}/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    // ── Editor ───────────────────────────────────────────────────────────────
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/.next": true,
+        "**/node_modules": true,
+        "**/venv": true
+    }
+}
