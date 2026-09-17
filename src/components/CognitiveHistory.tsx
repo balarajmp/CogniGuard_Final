@@ -1,7 +1,10 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronLeft, ChevronRight, Activity } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, Activity, Loader2 } from "lucide-react";
+import axios from "axios";
+import { getBiometricWS } from "@/lib/ws";
+import { getApiUrl } from "@/lib/api";
 
 // ─── Color helpers ────────────────────────────────────────────────────────────
 
@@ -50,59 +53,116 @@ const MONTH_NAMES = [
     "July", "August", "September", "October", "November", "December",
 ];
 
-/** Deterministic seeded pseudo-random so each month has a stable pattern */
-function seededRandom(seed: number) {
-    let s = seed;
-    return () => {
-        s = (s * 16807 + 0) % 2147483647;
-        return (s - 1) / 2147483646;
-    };
-}
-
-function generateMonth(monthIndex: number): { day: number; stress: number }[] {
-    const rand = seededRandom(monthIndex * 31337 + 97);
-    // Days in month (non-leap simplified)
-    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][monthIndex] ?? 30;
-    const sprintStart = Math.floor(rand() * (daysInMonth - 7)) + 1;
-    const recoveryStart = Math.floor(rand() * (daysInMonth - 5)) + 1;
-
-    return Array.from({ length: daysInMonth }, (_, i) => {
-        const day = i + 1;
-        // Day of week from Jan 1 2025 (Wednesday = index 2)
-        const dow = (day + monthIndex * 31 + 2) % 7;
-        let stress = 20 + rand() * 45;
-        if (dow === 5 || dow === 6) stress = 5 + rand() * 18;      // weekend recovery
-        if (day >= sprintStart && day < sprintStart + 5) stress = 72 + rand() * 28;  // sprint
-        if (day >= recoveryStart && day < recoveryStart + 3) stress = 5 + rand() * 12; // rest
-        return { day, stress };
-    });
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 const DOW_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
 /** Work out which column (0=Mon … 6=Sun) day-1 of a month falls on */
 function startDow(monthIndex: number): number {
-    // Jan 1 2025 was Wednesday (dow=2 in Mon-based)
-    const jan1Dow = 2; // Mon=0
+    const jan1Dow = 2; // Jan 1 2025 was Wednesday (dow=2 in Mon-based)
     return (jan1Dow + [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334][monthIndex]) % 7;
 }
 
 export default function CognitiveHistory() {
     const now = new Date();
     const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [dailyAverages, setDailyAverages] = useState<any[]>([]);
 
-    const days = useMemo(() => generateMonth(selectedMonth), [selectedMonth]);
+    const daysInMonth = useMemo(() => {
+        const year = new Date().getFullYear();
+        return new Date(year, selectedMonth + 1, 0).getDate();
+    }, [selectedMonth]);
+
     const offset = useMemo(() => startDow(selectedMonth), [selectedMonth]);
 
     const prev = useCallback(() => setSelectedMonth(m => (m - 1 + 12) % 12), []);
     const next = useCallback(() => setSelectedMonth(m => (m + 1) % 12), []);
 
+    const fetchDailyAverages = useCallback(async (showLoading = true) => {
+        if (showLoading) setLoading(true);
+        setError(null);
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setError("Authentication required.");
+                setLoading(false);
+                return;
+            }
+            const year = new Date().getFullYear();
+            const startStr = `${year}-${String(selectedMonth + 1).padStart(2, "0")}-01`;
+            const endStr = `${year}-${String(selectedMonth + 1).padStart(2, "0")}-${String(daysInMonth).padStart(2, "0")}`;
+            
+            const base = getApiUrl();
+            const res = await axios.get(`${base}/biometrics/history/daily-averages`, {
+                params: { start_date: startStr, end_date: endStr },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setDailyAverages(res.data);
+        } catch (err: any) {
+            console.error("Failed to fetch daily averages", err);
+            setError(err.response?.data?.detail || "Failed to retrieve cognitive history");
+        } finally {
+            if (showLoading) setLoading(false);
+        }
+    }, [selectedMonth, daysInMonth]);
+
+    useEffect(() => {
+        fetchDailyAverages(true);
+    }, [fetchDailyAverages]);
+
+    useEffect(() => {
+        const ws = getBiometricWS();
+        ws.connect();
+
+        let debounceTimer: NodeJS.Timeout;
+
+        const unsubscribe = ws.on("biometric_update", (msg) => {
+            const isCurrentMonth = selectedMonth === new Date().getMonth();
+            if (!isCurrentMonth) return;
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchDailyAverages(false);
+            }, 5000);
+        });
+
+        return () => {
+            unsubscribe();
+            clearTimeout(debounceTimer);
+        };
+    }, [selectedMonth, fetchDailyAverages]);
+
+    const days = useMemo(() => {
+        const dataMap = new Map<number, number>();
+        dailyAverages.forEach(item => {
+            if (item.date) {
+                const parts = item.date.split("-");
+                const dayNum = parseInt(parts[2], 10);
+                dataMap.set(dayNum, item.avg_stress_level);
+            }
+        });
+
+        return Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const stress = dataMap.has(day) ? dataMap.get(day)! : 0;
+            const hasData = dataMap.has(day);
+            return { day, stress, hasData };
+        });
+    }, [selectedMonth, dailyAverages, daysInMonth]);
+
     // Summary stats
-    const avgStress = Math.round(days.reduce((a, d) => a + d.stress, 0) / days.length);
-    const peakStress = Math.round(Math.max(...days.map(d => d.stress)));
-    const highDays = days.filter(d => d.stress > 70).length;
+    const activeDays = useMemo(() => days.filter(d => d.hasData), [days]);
+    const avgStress = useMemo(() => {
+        if (activeDays.length === 0) return 0;
+        return Math.round(activeDays.reduce((a, d) => a + d.stress, 0) / activeDays.length);
+    }, [activeDays]);
+    const peakStress = useMemo(() => {
+        if (activeDays.length === 0) return 0;
+        return Math.round(Math.max(...activeDays.map(d => d.stress)));
+    }, [activeDays]);
+    const highDays = useMemo(() => {
+        return activeDays.filter(d => d.stress > 70).length;
+    }, [activeDays]);
 
     return (
         <section className="w-full max-w-4xl mx-auto">
@@ -154,16 +214,16 @@ export default function CognitiveHistory() {
                 {/* ── Summary stats ───────────────────────────────────────────────── */}
                 <div className="grid grid-cols-3 gap-3 mb-8 relative z-10">
                     {[
-                        { label: "Avg Stress", value: `${avgStress}%`, color: stressRgb(avgStress) },
-                        { label: "Peak Stress", value: `${peakStress}%`, color: stressRgb(peakStress) },
-                        { label: "High-Risk Days", value: `${highDays}d`, color: stressRgb(highDays > 5 ? 80 : 40) },
+                        { label: "Avg Stress", value: activeDays.length > 0 ? `${avgStress}%` : "--", color: activeDays.length > 0 ? stressRgb(avgStress) : "156, 163, 175" },
+                        { label: "Peak Stress", value: activeDays.length > 0 ? `${peakStress}%` : "--", color: activeDays.length > 0 ? stressRgb(peakStress) : "156, 163, 175" },
+                        { label: "High-Risk Days", value: activeDays.length > 0 ? `${highDays}d` : "--", color: activeDays.length > 0 ? stressRgb(highDays > 5 ? 80 : 40) : "156, 163, 175" },
                     ].map(({ label, value, color }) => (
                         <div
                             key={label}
                             className="bg-black/40 border border-white/5 rounded-2xl px-4 py-3 flex flex-col items-center text-center"
                         >
                             <p className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">{label}</p>
-                            <p className="text-xl font-black" style={{ color: `rgb(${color})`, textShadow: `0 0 12px rgba(${color},0.5)` }}>
+                            <p className="text-xl font-black" style={{ color: `rgb(${color})`, textShadow: activeDays.length > 0 ? `0 0 12px rgba(${color},0.5)` : "none" }}>
                                 {value}
                             </p>
                         </div>
@@ -171,73 +231,96 @@ export default function CognitiveHistory() {
                 </div>
 
                 {/* ── Dot Matrix ──────────────────────────────────────────────────── */}
-                <div className="relative z-10">
-                    {/* Day-of-week headers */}
-                    <div className="grid grid-cols-7 gap-1.5 mb-1.5">
-                        {DOW_LABELS.map((d, i) => (
-                            <div key={i} className="h-5 flex items-center justify-center text-[10px] font-mono text-gray-600 tracking-widest">
-                                {d}
+                <div className="relative z-10 min-h-[180px] flex flex-col justify-center">
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-2 text-cyan-400 animate-pulse">
+                            <Loader2 className="w-8 h-8 animate-spin" />
+                            <p className="text-xs font-mono tracking-widest uppercase">Fetching Telemetry...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <p className="text-red-400 text-sm font-semibold">{error}</p>
+                            <p className="text-gray-500 text-xs font-mono mt-1 mb-4">Please ensure the backend is running and you are logged in.</p>
+                            <button
+                                onClick={() => fetchDailyAverages(true)}
+                                className="bg-red-500/15 border border-red-500/30 hover:bg-red-500/25 text-red-400 font-mono text-[10px] tracking-wider uppercase px-4 py-2 rounded-xl transition-all duration-200 active:scale-95"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Day-of-week headers */}
+                            <div className="grid grid-cols-7 gap-1.5 mb-1.5">
+                                {DOW_LABELS.map((d, i) => (
+                                    <div key={i} className="h-5 flex items-center justify-center text-[10px] font-mono text-gray-600 tracking-widest">
+                                        {d}
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
 
-                    {/* AnimatePresence: re-mount dots on month change for slide-in effect */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={selectedMonth}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                            className="grid grid-cols-7 gap-1.5"
-                        >
-                            {/* Start offset: empty ghost cells */}
-                            {Array.from({ length: offset }).map((_, i) => (
-                                <div key={`off-${i}`} className="h-8" />
-                            ))}
+                            {/* AnimatePresence: re-mount dots on month change for slide-in effect */}
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={selectedMonth}
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -12 }}
+                                    transition={{ duration: 0.25, ease: "easeOut" }}
+                                    className="grid grid-cols-7 gap-1.5"
+                                >
+                                    {/* Start offset: empty ghost cells */}
+                                    {Array.from({ length: offset }).map((_, i) => (
+                                        <div key={`off-${i}`} className="h-8" />
+                                    ))}
 
-                            {/* Day dots */}
-                            {days.map(({ day, stress }, i) => {
-                                const rgb = stressRgb(stress);
-                                const glowSize = stress > 70 ? "10px" : stress > 40 ? "6px" : "4px";
-                                return (
-                                    <motion.div
-                                        key={`${selectedMonth}-${day}`}
-                                        initial={{ opacity: 0, scale: 0.4 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 0.2, delay: i * 0.006, ease: "backOut" }}
-                                        className="h-8 flex items-center justify-center relative group/dot"
-                                    >
-                                        {/* Dot */}
-                                        <div
-                                            className="w-1.5 h-1.5 rounded-full backdrop-blur-md cursor-pointer
-                        transition-all duration-200 group-hover/dot:w-2.5 group-hover/dot:h-2.5 group-hover/dot:z-20"
-                                            style={{
-                                                backgroundColor: `rgba(${rgb}, 0.80)`,
-                                                border: `1px solid rgba(${rgb}, 0.95)`,
-                                                boxShadow: `0 0 ${glowSize} rgba(${rgb}, 0.7), inset 0 0 2px rgba(255,255,255,0.12)`,
-                                            }}
-                                        />
+                                    {/* Day dots */}
+                                    {days.map(({ day, stress, hasData }, i) => {
+                                        const rgb = hasData ? stressRgb(stress) : "156, 163, 175";
+                                        const glowSize = hasData ? (stress > 70 ? "10px" : stress > 40 ? "6px" : "4px") : "0px";
+                                        const borderStyle = hasData ? `1px solid rgba(${rgb}, 0.95)` : "1px solid rgba(255,255,255,0.08)";
+                                        const bgStyle = hasData ? `rgba(${rgb}, 0.80)` : "rgba(255,255,255,0.04)";
 
-                                        {/* Day number (visible on hover) */}
-                                        <span className="absolute -top-0.5 right-0.5 text-[8px] font-mono text-gray-700 opacity-0 group-hover/dot:opacity-100 transition-opacity duration-150 leading-none">
-                                            {day}
-                                        </span>
+                                        return (
+                                            <motion.div
+                                                key={`${selectedMonth}-${day}`}
+                                                initial={{ opacity: 0, scale: 0.4 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.2, delay: i * 0.006, ease: "backOut" }}
+                                                className="h-8 flex items-center justify-center relative group/dot"
+                                            >
+                                                {/* Dot */}
+                                                <div
+                                                    className="w-1.5 h-1.5 rounded-full backdrop-blur-md cursor-pointer
+                                transition-all duration-200 group-hover/dot:w-2.5 group-hover/dot:h-2.5 group-hover/dot:z-20"
+                                                    style={{
+                                                        backgroundColor: bgStyle,
+                                                        border: borderStyle,
+                                                        boxShadow: hasData ? `0 0 ${glowSize} rgba(${rgb}, 0.7), inset 0 0 2px rgba(255,255,255,0.12)` : "none",
+                                                    }}
+                                                />
 
-                                        {/* Tooltip */}
-                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg px-2.5 py-1.5 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-2xl">
-                                            <p className="text-[10px] font-mono text-gray-400">
-                                                {MONTH_NAMES[selectedMonth]} {day}
-                                            </p>
-                                            <p className="text-xs font-bold" style={{ color: `rgb(${rgb})` }}>
-                                                {stress.toFixed(0)}% &mdash; {stressLabel(stress)}
-                                            </p>
-                                        </div>
-                                    </motion.div>
-                                );
-                            })}
-                        </motion.div>
-                    </AnimatePresence>
+                                                {/* Day number (visible on hover) */}
+                                                <span className="absolute -top-0.5 right-0.5 text-[8px] font-mono text-gray-700 opacity-0 group-hover/dot:opacity-100 transition-opacity duration-150 leading-none">
+                                                    {day}
+                                                </span>
+
+                                                {/* Tooltip */}
+                                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black/90 backdrop-blur-md border border-white/10 rounded-lg px-2.5 py-1.5 opacity-0 group-hover/dot:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-2xl">
+                                                    <p className="text-[10px] font-mono text-gray-400">
+                                                        {MONTH_NAMES[selectedMonth]} {day}
+                                                    </p>
+                                                    <p className="text-xs font-bold" style={{ color: hasData ? `rgb(${rgb})` : "#9ca3af" }}>
+                                                        {hasData ? `${stress.toFixed(0)}% — ${stressLabel(stress)}` : "No telemetry recorded"}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </motion.div>
+                            </AnimatePresence>
+                        </>
+                    )}
                 </div>
 
                 {/* ── Legend ──────────────────────────────────────────────────────── */}

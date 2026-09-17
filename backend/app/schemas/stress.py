@@ -27,19 +27,26 @@ class BurnoutRiskResult(BaseModel):
     intervention_message: Optional[str] = None
 
 
-class InterventionResponse(BaseModel):
-    model_config = {"from_attributes": True}
-
-    id: int
-    user_id: int
-    triggered_at: datetime
-    intervention_type: str
-    message: str
-    stress_level_at_trigger: float
-    risk_tier_at_trigger: str
-    was_acknowledged: bool
-    acknowledged_at: Optional[datetime]
+from app.schemas.intervention import (
+    InterventionResponse,
+    AcknowledgeIntervention,
+    DismissIntervention,
+    InterventionDecision,
+    InterventionSeverity,
+    InterventionPriority,
+    DeliveryChannel,
+)
 
 
-class AcknowledgeIntervention(BaseModel):
-    intervention_id: int
+class DailyAverageItem(BaseModel):
+    date: str
+    avg_stress_level: float
+    avg_burnout_risk_pct: float
+    avg_focus_reserves_pct: float
+    count: int
+
+
+class BurnoutForecastResponse(BaseModel):
+    forecast_points: list[float]
+    estimated_depletion_hours: Optional[float] = None
+

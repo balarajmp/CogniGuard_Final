@@ -44,10 +44,12 @@ next-env.d.ts
 backend/venv/
 backend/__pycache__/
 backend/**/__pycache__/
-backend/*.db
-backend/*.sqlite3
+*.db
+*.sqlite3
 backend/*.log
 backend/pip_out*.txt
 backend/uvicorn_*.txt
 backend/output.log
 backend/error.log
+artifacts/
+backend/artifacts/

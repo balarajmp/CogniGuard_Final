@@ -15,7 +15,7 @@ export default function GuestBanner() {
     const handleExit = () => {
         logout();
         setIsVisible(false);
-        router.push("/login");
+        router.push("/home");
     };
 
     return (

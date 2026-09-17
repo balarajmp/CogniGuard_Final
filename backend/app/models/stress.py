@@ -1,11 +1,15 @@
 from __future__ import annotations
-from sqlalchemy import Float, DateTime, ForeignKey, func, Integer, String, Column
+from sqlalchemy import Float, DateTime, ForeignKey, func, Integer, String, Column, Index
 from sqlalchemy.orm import relationship
 from app.db.session import Base
 
 
 class StressHistory(Base):
     __tablename__ = "stress_history"
+
+    __table_args__ = (
+        Index("ix_stress_history_user_id_recorded_at", "user_id", "recorded_at"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
@@ -17,3 +21,4 @@ class StressHistory(Base):
     risk_tier = Column(String(20), nullable=False)
 
     user = relationship("User", back_populates="stress_history")
+

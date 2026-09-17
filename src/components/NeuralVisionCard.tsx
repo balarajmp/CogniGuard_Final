@@ -4,6 +4,7 @@ import TiltCard from "./TiltCard";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { getApiUrl } from "@/lib/api";
 
 export default function NeuralVisionCard() {
     const [delta, setDelta] = useState(14);
@@ -15,7 +16,7 @@ export default function NeuralVisionCard() {
 
             const token = localStorage.getItem("token");
             if (token) {
-                const base = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+                const base = getApiUrl();
                 axios.post(`${base}/biometrics/ingest`, {
                     typing_speed_wpm: 60,
                     heart_rate_bpm: 72,

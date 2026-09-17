@@ -39,9 +39,57 @@ class AuthService:
         if not user.is_active:
             raise CredentialsException("Account is disabled")
 
-        token = security.create_access_token(subject=user.username, role=user.role)
-        return Token(access_token=token, token_type="bearer", role=user.role)
+        access_token = security.create_access_token(subject=user.username, role=user.role)
+        refresh_token = security.create_refresh_token(subject=user.username, role=user.role)
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            role=user.role
+        )
 
     async def guest_login(self) -> Token:
-        token = security.create_guest_token()
-        return Token(access_token=token, token_type="bearer", role="guest")
+        access_token = security.create_guest_token()
+        refresh_token = security.create_refresh_token(subject="guest", role="guest")
+        return Token(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            role="guest"
+        )
+
+    async def refresh_session(self, refresh_token: str) -> Token:
+        try:
+            payload = security.decode_token(refresh_token)
+            username: str | None = payload.get("sub")
+            role: str = payload.get("role", "user")
+            token_type: str = payload.get("type", "refresh")
+            if not username or token_type != "refresh":
+                raise CredentialsException("Invalid refresh token")
+        except Exception:
+            raise CredentialsException("Invalid refresh token")
+
+        # For guest, bypass DB check
+        if username == "guest" or role == "guest":
+            new_access = security.create_guest_token()
+            new_refresh = security.create_refresh_token(subject="guest", role="guest")
+            return Token(
+                access_token=new_access,
+                refresh_token=new_refresh,
+                token_type="bearer",
+                role="guest"
+            )
+
+        user = await self.repo.get_by_username(username)
+        if not user or not user.is_active:
+            raise CredentialsException("User not found or disabled")
+
+        new_access = security.create_access_token(subject=user.username, role=user.role)
+        new_refresh = security.create_refresh_token(subject=user.username, role=user.role)
+        return Token(
+            access_token=new_access,
+            refresh_token=new_refresh,
+            token_type="bearer",
+            role=user.role
+        )
+

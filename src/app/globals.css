@@ -1,26 +1,125 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   CognitoShield AI — Design System Tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  /* ── Backgrounds ─────────────────────────────────────────── */
+  --bg-primary:   #030609;
+  --bg-secondary: #080E13;
+  --bg-panel:     rgba(8, 14, 19, 0.72);
+  --bg-glass:     rgba(8, 14, 19, 0.60);
+
+  /* ── Accents ─────────────────────────────────────────────── */
+  --accent:       #00D9FF;
+  --accent-2:     #5EE7FF;
+  --accent-glow:  rgba(0, 217, 255, 0.40);
+  --accent-surf:  rgba(0, 217, 255, 0.07);
+  --accent-dim:   rgba(0, 217, 255, 0.12);
+
+  /* ── Text ────────────────────────────────────────────────── */
+  --text-primary:   #F5F7FA;
+  --text-secondary: #B8C8D4;
+  --text-muted:     #8A9AA8;
+  --text-accent:    #00D9FF;
+
+  /* ── Borders ─────────────────────────────────────────────── */
+  --border-subtle:  rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.09);
+  --border-accent:  rgba(0, 217, 255, 0.10);
+  --border-strong:  rgba(0, 217, 255, 0.35);
+
+  /* ── Shadows ─────────────────────────────────────────────── */
+  --shadow-card:   0 8px 40px rgba(0, 0, 0, 0.55);
+  --shadow-glow:   0 0 24px rgba(0, 217, 255, 0.18);
+  --shadow-panel:  0 2px 20px rgba(0, 0, 0, 0.6);
+
+  /* ── Glass ───────────────────────────────────────────────── */
+  --glass-blur: 16px;
+
+  /* ── Typography (legacy compat) ─────────────────────────── */
+  --background: #030609;
+  --foreground: #F5F7FA;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* ── Recovery Center — Dark Natural Sanctuary ──────────────── */
+  /* Backgrounds: dark charcoal / deep forest */
+  --rc-bg:          #0C110E;          /* deep charcoal / forest night base */
+  --rc-bg-alt:      #131B16;          /* deep forest charcoal              */
+  --rc-bg-card:     rgba(18, 26, 21, 0.72); /* translucent dark glassmorphism card */
+  --rc-bg-card-hover: rgba(26, 38, 30, 0.85);
+  --rc-bg-deep:     #070A08;          /* deepest atmospheric shadow        */
+
+  /* Sage / rich natural green family */
+  --rc-sage:        #5E966A;          /* balanced natural sage             */
+  --rc-sage-light:  #84BD90;          /* bright foliage accent             */
+  --rc-sage-dim:    rgba(94, 150, 106, 0.16); /* translucent sage          */
+  --rc-sage-surf:   rgba(94, 150, 106, 0.26); /* active sage surface       */
+
+  /* Earth & warm amber tones */
+  --rc-earth:       #B59A78;          /* warm natural earth                */
+  --rc-earth-light: #D9BE9C;          /* warm sunlight highlight           */
+  --rc-earth-dim:   rgba(181, 154, 120, 0.16);
+  --rc-amber:       #E6A756;          /* subtle warm amber glow            */
+  --rc-amber-dim:   rgba(230, 167, 86, 0.14);
+
+  /* Moss / rich forest accent for CTAs */
+  --rc-moss:        #3E7244;          /* rich forest moss                  */
+  --rc-moss-hover:  #4D8C54;
+
+  /* Typography: high legibility on dark surfaces */
+  --rc-text-primary:   #EFF5EC;      /* luminous soft off-white text      */
+  --rc-text-secondary: #A8BAA5;      /* calm muted sage-grey              */
+  --rc-text-muted:     #6D826B;      /* subtle foliage muted tone         */
+  --rc-text-inverse:   #0C110E;      /* text on high-contrast surfaces    */
+
+  /* Subtle borders & soft atmospheric shadows */
+  --rc-border:      rgba(132, 189, 144, 0.14);
+  --rc-border-soft: rgba(255, 255, 255, 0.07);
+  --rc-border-card: rgba(132, 189, 144, 0.16);
+
+  /* Shadows: deep cinematic shadows */
+  --rc-shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --rc-shadow-lift: 0 16px 48px rgba(0, 0, 0, 0.65);
+
+  /* Gradients: dark natural atmospheric depth */
+  --rc-grad-hero: linear-gradient(160deg, #131F17 0%, #0D1611 60%, #090E0B 100%);
+  --rc-grad-sage:  linear-gradient(135deg, #417047 0%, #254429 100%);
+  --rc-grad-earth: linear-gradient(135deg, #786043 0%, #463725 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  /* Lenis requires overflow on html/body to be unset so it can control scroll */
-  overflow-x: hidden;
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base Reset
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Lenis — keep native scroll element as html for pointer events */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Lenis smooth scroll */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -32,7 +131,101 @@ html.lenis body {
   overscroll-behavior: contain;
 }
 
-/* Scroll-snap sections — applied via data attributes on section wrappers */
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utility Classes — Design System
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Glass panel */
+.cs-glass {
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-accent);
+  border-radius: 1.25rem;
+}
+
+.cs-glass-accent {
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-accent);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Legacy alias */
+.glass-card {
+  background: var(--bg-panel);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--border-accent);
+  border-radius: 1.25rem;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #F5F7FA 0%, #00D9FF 55%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Mono label eyebrow */
+.mono-label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+}
+
+/* Section ambient glow */
+.section-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44rem;
+  height: 18rem;
+  background: radial-gradient(ellipse, rgba(0, 217, 255, 0.045) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Grid dot-pattern background */
+.grid-pattern-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 10%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, #000 10%, transparent 100%);
+}
+
+/* Auth page dot-grid */
+.auth-grid {
+  background-image:
+    linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 0.5rem;
+}
+
+/* Snap scroll */
 [data-snap-section] {
   scroll-snap-align: start;
 }
@@ -42,7 +235,7 @@ html.lenis body {
   height: 100vh;
 }
 
-/* Perspective utilities for parallax depth layers */
+/* Depth utilities (legacy) */
 .depth-near {
   transform: translateZ(60px) scale(0.95);
   z-index: 22;
@@ -50,4 +243,99 @@ html.lenis body {
 .depth-mid {
   transform: translateZ(30px) scale(0.97);
   z-index: 21;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Scrollbar
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,217,255,0.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,217,255,0.35); }
+* { scrollbar-width: thin; scrollbar-color: rgba(0,217,255,0.18) transparent; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Keyframes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(0,217,255,0.12); }
+  50%       { box-shadow: 0 0 32px rgba(0,217,255,0.28); }
+}
+
+@keyframes glitch {
+  0%   { transform: translate(0); }
+  20%  { transform: translate(-2px, 2px); }
+  40%  { transform: translate(-2px,-2px); }
+  60%  { transform: translate(2px, 2px); }
+  80%  { transform: translate(2px,-2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes scan-line {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+
+@keyframes ping-soft {
+  0%   { transform: scale(1); opacity: 0.5; }
+  75%  { transform: scale(1.8); opacity: 0; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ─── Recovery Center — Sanctuary animations ─────────────────────── */
+
+/* Gentle slow float for organic blobs (used as fallback / CSS-only) */
+@keyframes rc-float {
+  0%,  100% { transform: translateY(0) translateX(0) scale(1);    }
+  33%        { transform: translateY(-14px) translateX(6px) scale(1.02); }
+  66%        { transform: translateY(-6px) translateX(-4px) scale(0.99); }
+}
+
+/* Subtle pulse for the icon container in recommendation card */
+@keyframes rc-pulse {
+  0%,  100% { transform: scale(1);    opacity: 1;    }
+  50%        { transform: scale(1.04); opacity: 0.92; }
+}
+
+/* Fine particle drift */
+@keyframes rc-drift {
+  0%,  100% { transform: translateY(0);    opacity: 0.35; }
+  50%        { transform: translateY(-20px); opacity: 0.8;  }
+}
+
+/* Recovery Center card hover lift utility */
+.rc-card-hover {
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+.rc-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--rc-shadow-lift);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Sanctuary overrides — keep layout transitions, suppress float/drift */
+  .rc-blob,
+  .rc-particle {
+    animation: none !important;
+  }
 }

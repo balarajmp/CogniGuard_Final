@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import GuestBanner from "@/components/GuestBanner";
 import LenisProvider from "@/components/LenisProvider";
+import LayoutShell from "./LayoutShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,7 +18,22 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "CogniGuard — Privacy-First Cognitive Load & Burnout Detection",
-  description: "A Privacy-First Platform for Cognitive Load & Burnout Detection",
+  description:
+    "CogniGuard is an AI-powered platform that passively monitors cognitive load and burnout risk using privacy-first biometric analysis. Protect your team's mental health with real-time insights.",
+  openGraph: {
+    title: "CogniGuard — Privacy-First Cognitive Load & Burnout Detection",
+    description:
+      "AI-powered cognitive health platform with privacy-first biometric analysis.",
+    siteName: "CogniGuard",
+    type: "website",
+    url: "https://cogniguard.ai",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CogniGuard — Privacy-First Cognitive Load & Burnout Detection",
+    description:
+      "AI-powered cognitive health platform with privacy-first biometric analysis.",
+  },
 };
 
 export default function RootLayout({
@@ -33,7 +49,7 @@ export default function RootLayout({
         <AuthProvider>
           <LenisProvider>
             <GuestBanner />
-            {children}
+            <LayoutShell>{children}</LayoutShell>
           </LenisProvider>
         </AuthProvider>
       </body>

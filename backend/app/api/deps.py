@@ -1,4 +1,4 @@
-from __future__ import annotations
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -30,7 +30,19 @@ async def get_current_user(
         raise CredentialsException()
 
     if role == "guest" or username == "guest":
-        return User(id=0, username="guest", role="guest", is_active=True, is_guest=True)
+        return User(
+            id=0,
+            username="guest",
+            role="guest",
+            is_active=True,
+            is_guest=True,
+            created_at=datetime.now(timezone.utc),
+            keyboard_tracking=True,
+            heart_rate_telemetry=True,
+            facial_fatigue_webcam=False,
+            ambient_noise_mapping=True,
+            noise_multiplier=0.1
+        )
 
     repo = UserRepository(db)
     user = await repo.get_by_username(username)

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "SUPER_SECRET_KEY_FOR_DEV_ONLY_DO_NOT_USE_IN_PROD_CHANGE_ME"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7   # 7 days
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30  # 30 days
     GUEST_TOKEN_EXPIRE_MINUTES: int = 60              # 1 hour
 
     # --- Database ---

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import TiltCard from "./TiltCard";
 
 import axios from "axios";
+import { getApiUrl } from "@/lib/api";
 
 export default function CognitivePrecision() {
     const [wpm, setWpm] = useState(85);
@@ -17,7 +18,7 @@ export default function CognitivePrecision() {
 
             const token = localStorage.getItem("token");
             if (token) {
-                axios.post("http://localhost:8000/api/biometrics/ingest", {
+                axios.post(`${getApiUrl()}/biometrics/ingest`, {
                     typing_speed_wpm: newWpm,
                     heart_rate_bpm: 72, // default placeholder
                     facial_fatigue_score: 0.1 // default placeholder

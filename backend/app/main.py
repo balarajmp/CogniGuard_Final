@@ -11,7 +11,7 @@ from app.db.session import init_db
 import app.db.base  # noqa: F401
 
 # Route modules
-from app.api.v1 import auth, biometrics, interventions, enterprise
+from app.api.v1 import auth, biometrics, interventions, enterprise, insights, copilot, focus, achievements, ml_dataset, admin, recovery
 from app.websockets.telemetry_handler import telemetry_endpoint
 
 logger = get_logger(__name__)
@@ -61,6 +61,13 @@ app.include_router(auth.router, prefix=f"{PREFIX}/auth", tags=["Authentication"]
 app.include_router(biometrics.router, prefix=f"{PREFIX}/biometrics", tags=["Biometrics"])
 app.include_router(interventions.router, prefix=f"{PREFIX}/interventions", tags=["Interventions"])
 app.include_router(enterprise.router, prefix=f"{PREFIX}/enterprise", tags=["Enterprise"])
+app.include_router(insights.router, prefix=f"{PREFIX}/insights", tags=["AI Insights"])
+app.include_router(copilot.router, prefix=f"{PREFIX}/copilot", tags=["Cognitive Copilot"])
+app.include_router(focus.router, prefix=f"{PREFIX}/focus", tags=["Focus Scheduler"])
+app.include_router(achievements.router, prefix=f"{PREFIX}/achievements", tags=["Achievements"])
+app.include_router(ml_dataset.router, prefix=f"{PREFIX}/ml/dataset", tags=["ML Dataset"])
+app.include_router(admin.router, prefix=f"{PREFIX}/admin", tags=["Admin Control Panel"])
+app.include_router(recovery.router, prefix=f"{PREFIX}/recovery", tags=["Recovery Tracking"])
 
 
 # --- WebSocket ---
